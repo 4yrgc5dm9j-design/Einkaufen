@@ -26,6 +26,8 @@ Dann <http://localhost:3000> öffnen, Konto anlegen – fertig. Die Daten liegen
 
 Tests: `npm test`
 
+👉 **Schritt-für-Schritt-Anleitung zum Online-Stellen und Installieren aufs Handy: [ANLEITUNG-ONLINE.md](ANLEITUNG-ONLINE.md)**
+
 ## Öffentlich betreiben
 
 Damit ihr die App beide auf dem Handy nutzen könnt, muss sie auf einem Server mit **HTTPS** laufen (Push-Benachrichtigungen und „Zum Home-Bildschirm“ funktionieren nur mit HTTPS).

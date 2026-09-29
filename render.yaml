@@ -1,0 +1,23 @@
+# Blueprint für Render (https://render.com): richtet die App mit dauerhaftem Speicher ein.
+services:
+  - type: web
+    name: alltag
+    runtime: docker
+    plan: starter
+    region: frankfurt
+    healthCheckPath: /api/health
+    envVars:
+      - key: TZ
+        value: Europe/Berlin
+      - key: TRUST_PROXY
+        value: "1"
+      - key: DATA_DIR
+        value: /var/data
+      - key: REGISTRATION_CODE
+        generateValue: true
+      - key: VAPID_CONTACT
+        value: mailto:admin@example.com
+    disk:
+      name: alltag-data
+      mountPath: /var/data
+      sizeGB: 1
