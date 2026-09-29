@@ -4,8 +4,12 @@ import { html, setHTML, $, formData } from '../ui.js';
 export async function render(root, _params, { onLoggedIn }) {
   let mode = 'login';
   let codeRequired = false;
+  let local = false;
   try {
-    codeRequired = (await api.get('/auth/config')).registrationCodeRequired;
+    const cfg = await api.get('/auth/config');
+    codeRequired = cfg.registrationCodeRequired;
+    local = cfg.mode === 'local';
+    if (local && !cfg.hasUsers) mode = 'register';
   } catch {
     /* ignorieren */
   }
@@ -45,6 +49,9 @@ export async function render(root, _params, { onLoggedIn }) {
               <div class="form-error" id="auth-error" role="alert"></div>
               <button class="btn btn-primary btn-block" type="submit">${mode === 'login' ? 'Anmelden' : 'Konto erstellen'}</button>
             </form>
+            ${local
+              ? html`<p class="muted small" style="margin-top:14px;text-align:center">🔒 Deine Daten bleiben auf diesem Gerät. Mit deinem Partner gleichst du sie später unter <em>Einstellungen</em> ab.</p>`
+              : ''}
           </div>
         </section>
       </div>`,

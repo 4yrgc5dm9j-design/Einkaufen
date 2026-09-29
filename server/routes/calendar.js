@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { db, plainAll } from '../db.js';
-import { str, int, bad, notFound, oneOf, color, localDate, localDateTime } from '../lib/validate.js';
+import { str, int, bad, notFound, oneOf, color, localDate, localDateTime } from '../../public/js/shared/validate.js';
 import { RECURRENCE_LABELS, toLocalDate } from '../../public/js/shared/recurrence.js';
 
 export const calendarRouter = Router();

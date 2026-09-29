@@ -1,6 +1,6 @@
 // Service Worker: Offline-Grundgerüst und Push-Benachrichtigungen.
-const CACHE = 'alltag-v1';
-const SHELL = ['/', '/index.html', '/css/app.css', '/js/app.js', '/js/ui.js', '/js/api.js', '/icons/icon.svg', '/manifest.webmanifest'];
+const CACHE = 'alltag-v2';
+const SHELL = ['./', 'index.html', 'css/app.css', 'js/app.js', 'js/ui.js', 'js/api.js', 'js/config.js', 'icons/icon.svg', 'manifest.webmanifest'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting()));
@@ -16,7 +16,7 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
   if (event.request.method !== 'GET' || url.origin !== location.origin) return;
-  if (url.pathname.startsWith('/api/') || url.pathname.startsWith('/uploads/')) return;
+  if (url.pathname.includes('/api/') || url.pathname.includes('/uploads/')) return;
   event.respondWith(
     fetch(event.request)
       .then((res) => {
@@ -26,7 +26,7 @@ self.addEventListener('fetch', (event) => {
         }
         return res;
       })
-      .catch(() => caches.match(event.request).then((r) => r || caches.match('/index.html'))),
+      .catch(() => caches.match(event.request).then((r) => r || caches.match('index.html'))),
   );
 });
 
@@ -40,10 +40,10 @@ self.addEventListener('push', (event) => {
   event.waitUntil(
     self.registration.showNotification(data.title || 'Alltag', {
       body: data.body || '',
-      icon: '/icons/icon-192.png',
-      badge: '/icons/icon-192.png',
+      icon: 'icons/icon-192.png',
+      badge: 'icons/icon-192.png',
       tag: data.tag,
-      data: { url: data.url || '/' },
+      data: { url: data.url || './' },
       vibrate: [80, 40, 80],
     }),
   );
@@ -51,7 +51,7 @@ self.addEventListener('push', (event) => {
 
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
-  const target = event.notification.data?.url || '/';
+  const target = new URL(event.notification.data?.url || './', self.registration.scope).href;
   event.waitUntil(
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((wins) => {
       for (const w of wins) {

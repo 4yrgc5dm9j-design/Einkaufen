@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { db, tx, plainAll } from '../db.js';
-import { str, num, int, bad, notFound, oneOf } from '../lib/validate.js';
+import { str, num, int, bad, notFound, oneOf } from '../../public/js/shared/validate.js';
 import { parseIngredient, guessCategory, CATEGORIES } from '../../public/js/shared/ingredients.js';
 
 export const shoppingRouter = Router();

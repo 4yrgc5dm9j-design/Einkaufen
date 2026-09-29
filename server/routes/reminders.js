@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { db, plainAll } from '../db.js';
-import { str, int, notFound, oneOf, localDateTime, bad } from '../lib/validate.js';
+import { str, int, notFound, oneOf, localDateTime, bad } from '../../public/js/shared/validate.js';
 import { nextDue, toLocalDate } from '../../public/js/shared/recurrence.js';
 
 export const remindersRouter = Router();

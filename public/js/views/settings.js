@@ -1,12 +1,62 @@
 import { api } from '../api.js';
 import { html, setHTML, icon, $, on, toast, toastError, confirmDialog, openModal, formData, avatar } from '../ui.js';
 import { applyTheme, localStorageGet, localStorageSet, pushStatus, enablePush, disablePush, logout } from '../app.js';
+import { offerFile, downloadIcs } from '../ics.js';
+
+// ---------- Abgleich (nur lokale Web-App) ----------
+async function gzipBase64(text) {
+  if (typeof CompressionStream === 'undefined') return `A1:${btoa(unescape(encodeURIComponent(text)))}`;
+  const stream = new Blob([text]).stream().pipeThrough(new CompressionStream('gzip'));
+  const bytes = new Uint8Array(await new Response(stream).arrayBuffer());
+  let bin = '';
+  for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+  return `A1Z:${btoa(bin)}`;
+}
+
+async function unBase64(code) {
+  const c = code.trim().replace(/\s+/g, '');
+  if (c.startsWith('A1:')) return decodeURIComponent(escape(atob(c.slice(3))));
+  if (!c.startsWith('A1Z:')) throw new Error('Das ist kein gültiger Abgleich-Code.');
+  const bytes = Uint8Array.from(atob(c.slice(4)), (ch) => ch.charCodeAt(0));
+  const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));
+  return new Response(stream).text();
+}
+
+function syncResult(res) {
+  localStorageSet('last-sync', new Date().toISOString());
+  const n = res.added + res.updated;
+  toast(n ? `Abgeglichen ✓ ${res.added} neu, ${res.updated} aktualisiert` : 'Alles war schon auf dem neuesten Stand ✓', { type: 'success' });
+}
 
 const USER_COLORS = ['#6366f1', '#ec4899', '#14b8a6', '#f59e0b', '#8b5cf6', '#0ea5e9', '#ef4444', '#22c55e', '#f97316', '#64748b'];
 
 export async function render(view, _p, ctx) {
   ctx.setTitle('Einstellungen');
   let push = await pushStatus().catch(() => 'unsupported');
+
+  const local = ctx.me.mode === 'local';
+
+  const syncBox = () => {
+    const last = localStorageGet('last-sync');
+    return html`<div class="invite-box" style="margin-top:14px">
+      <strong style="display:flex;align-items:center;gap:8px">${icon('refresh', 18)} Mit Partner abgleichen</strong>
+      <ol class="muted small" style="margin:8px 0 12px;padding-left:18px;line-height:1.6">
+        <li>Tippe auf <b>„Daten senden“</b> und schick die Datei z. B. per WhatsApp oder AirDrop.</li>
+        <li>Dein Partner öffnet Alltag und tippt auf <b>„Daten empfangen“</b> und wählt die Datei.</li>
+        <li>Danach genauso zurück – dann habt ihr beide denselben Stand.</li>
+      </ol>
+      <div class="row" style="flex-wrap:wrap;gap:8px">
+        <button class="btn btn-primary btn-sm" data-action="sync-send">${icon('upload', 16)} Daten senden</button>
+        <label class="btn btn-ghost btn-sm" style="cursor:pointer">${icon('refresh', 16)} Daten empfangen<input type="file" id="sync-file" accept=".json,application/json" hidden></label>
+      </div>
+      <div class="row" style="flex-wrap:wrap;gap:8px;margin-top:8px">
+        <button class="btn btn-ghost btn-sm" data-action="code-copy">Code kopieren (ohne Fotos)</button>
+        <button class="btn btn-ghost btn-sm" data-action="code-paste">Code einfügen</button>
+      </div>
+      <p class="muted small" style="margin-top:10px">Deine Daten liegen nur auf diesem Gerät. ${last ? `Letzter Abgleich: ${new Date(last).toLocaleString('de-DE', { dateStyle: 'short', timeStyle: 'short' })}.` : ''} Die Datei ist auch deine Sicherung.</p>
+    </div>
+    <p class="muted small" style="margin-top:10px">Weitere Person auf <em>diesem</em> Gerät? Abmelden und „Registrieren“ wählen.</p>`;
+  };
 
   const draw = () => {
     const { user, household, invitations, bundeslaender } = ctx.me;
@@ -43,15 +93,15 @@ export async function render(view, _p, ctx) {
           ${invitations.outgoing.map(
             (inv) => html`<div class="member-row" style="opacity:.75"><span class="avatar" style="--c:var(--surface-3);width:40px;height:40px;color:var(--muted)">${icon('mail', 18)}</span><div class="info"><strong>${inv.to_name}</strong><small>Einladung ausstehend · ${inv.to_email}</small></div><button class="btn btn-ghost btn-sm" data-decline="${inv.id}">Zurückziehen</button></div>`,
           )}
-          <form id="invite-form" style="margin-top:14px">
+          ${local ? syncBox() : html`<form id="invite-form" style="margin-top:14px">
             <label class="label" for="invite-email">Person einladen</label>
             <div class="row" style="margin-top:6px">
               <input class="input grow" id="invite-email" name="email" type="email" placeholder="E-Mail des Kontos" required>
               <button class="btn btn-primary" type="submit">${icon('mail', 16)} Einladen</button>
             </div>
             <p class="muted small" style="margin-top:8px">Die Person muss bereits ein Konto haben und die Einladung annehmen. Danach teilt ihr Kalender, Einkaufslisten, Rezepte und Erinnerungen. Private Termine bleiben privat.</p>
-          </form>
-          ${household.members.length > 1 ? html`<button class="btn btn-ghost btn-sm" data-action="leave" style="margin-top:10px;color:var(--danger)">${icon('logout', 15)} Haushalt verlassen</button>` : ''}
+          </form>`}
+          ${household.members.length > 1 && !local ? html`<button class="btn btn-ghost btn-sm" data-action="leave" style="margin-top:10px;color:var(--danger)">${icon('logout', 15)} Haushalt verlassen</button>` : ''}
         </section>
 
         <section class="card card-pad">
@@ -76,13 +126,17 @@ export async function render(view, _p, ctx) {
                 ? 'Dieser Browser unterstützt keine Push-Nachrichten. Auf dem iPhone: App erst zum Home-Bildschirm hinzufügen.'
                 : push === 'denied'
                   ? 'Blockiert – bitte in den Browser-Einstellungen erlauben.'
+                  : local
+                  ? 'Hinweise für fällige Erinnerungen und Termine.'
                   : 'Für Termine und Erinnerungen auf diesem Gerät.'
             }</small></div>
             ${push === 'on' || push === 'off'
               ? html`<label class="switch"><input type="checkbox" id="push-toggle" ${push === 'on' ? 'checked' : ''}><span class="track"></span></label>`
               : ''}
           </div>
-          ${push === 'on' ? html`<button class="btn btn-ghost btn-sm" data-action="test-push" style="margin-top:8px">Test senden</button>` : ''}
+          ${push === 'on' && !local ? html`<button class="btn btn-ghost btn-sm" data-action="test-push" style="margin-top:8px">Test senden</button>` : ''}
+          ${local ? html`<p class="muted small" style="margin-top:8px">Hinweise erscheinen, solange Alltag geöffnet ist. Für zuverlässige Wecker übernimm Termine in den Kalender deines Handys – mit Erinnerung:</p>` : ''}
+          <button class="btn btn-ghost btn-sm" data-action="ics-all" style="margin-top:8px">${icon('calendar', 15)} Alle Termine in Handy-Kalender</button>
         </section>
 
         <section class="card card-pad">
@@ -153,6 +207,18 @@ export async function render(view, _p, ctx) {
     draw();
   });
   view.addEventListener('change', async (e) => {
+    if (e.target.id === 'sync-file') {
+      const file = e.target.files[0];
+      if (!file) return;
+      try {
+        const res = await api.post('/sync/import', JSON.parse(await file.text()));
+        syncResult(res);
+        reload();
+      } catch (err) {
+        toastError(err.status ? err : new Error('Die Datei konnte nicht gelesen werden.'));
+      }
+      return;
+    }
     if (e.target.id !== 'push-toggle') return;
     try {
       if (e.target.checked) {
@@ -172,6 +238,51 @@ export async function render(view, _p, ctx) {
   on(view, 'click', '[data-action]', async (e, el) => {
     const a = el.dataset.action;
     if (a === 'logout') logout();
+    if (a === 'sync-send') {
+      try {
+        const data = await api.get('/sync/export');
+        const date = new Date().toISOString().slice(0, 10);
+        await offerFile(`alltag-${ctx.user.name.toLowerCase().replace(/[^a-z0-9äöüß]+/g, '-')}-${date}.json`, JSON.stringify(data), 'application/json');
+        localStorageSet('last-sync', new Date().toISOString());
+      } catch (err) {
+        toastError(err);
+      }
+    }
+    if (a === 'code-copy') {
+      try {
+        const code = await gzipBase64(JSON.stringify(await api.get('/sync/export?images=0')));
+        await navigator.clipboard.writeText(code);
+        toast(`Code kopiert (${Math.round(code.length / 1024)} KB) – jetzt z. B. per WhatsApp schicken.`, { type: 'success' });
+      } catch (err) {
+        toastError(err);
+      }
+    }
+    if (a === 'code-paste') {
+      const m = openModal({
+        title: 'Code einfügen',
+        body: html`<p class="muted small" style="margin-bottom:10px">Füge den Code ein, den dein Partner dir geschickt hat.</p><textarea class="input" id="sync-code" rows="5" placeholder="A1Z:…" autofocus></textarea>`,
+        footer: html`<button class="btn btn-ghost" data-close>Abbrechen</button><button class="btn btn-primary" data-ok>Abgleichen</button>`,
+      });
+      $('[data-ok]', m.el).onclick = async () => {
+        try {
+          const res = await api.post('/sync/import', JSON.parse(await unBase64($('#sync-code', m.el).value)));
+          m.close();
+          syncResult(res);
+          reload();
+        } catch (err) {
+          toastError(err.status ? err : new Error('Der Code ist ungültig oder unvollständig.'));
+        }
+      };
+    }
+    if (a === 'ics-all') {
+      try {
+        const events = await api.get('/calendar/events?from=2000-01-01&to=2100-01-01');
+        if (!events.length) return toast('Noch keine Termine vorhanden.');
+        await downloadIcs(events, 'alltag-termine.ics');
+      } catch (err) {
+        toastError(err);
+      }
+    }
     if (a === 'test-push') {
       const { sent } = await api.post('/push/test');
       toast(sent ? 'Test gesendet – gleich sollte eine Nachricht erscheinen.' : 'Kein Gerät registriert.');

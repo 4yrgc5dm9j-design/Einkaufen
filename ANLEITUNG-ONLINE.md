@@ -1,4 +1,44 @@
-# Alltag online stellen und aufs Handy holen 📱
+# Alltag aufs Handy holen 📱
+
+## Kostenlos als Web-App (wie das Haushaltsbuch) – empfohlen
+
+GitHub baut die App bei jeder Änderung automatisch und stellt sie kostenlos online (`.github/workflows/pages.yml`).
+Alle Daten bleiben **auf eurem jeweiligen Handy** – es gibt keinen Server und keine Kosten.
+
+**Einmalig einrichten (auf github.com, am Computer oder im Handy-Browser):**
+1. Im Repository **Settings → Pages**: Bei „Source“ **GitHub Actions** auswählen.
+2. **Actions → „Web-App veröffentlichen“ → Run workflow** klicken (oder auf die nächste Änderung warten).
+   Nach ca. 2 Minuten ist die App online unter:
+   **https://4yrgc5dm9j-design.github.io/Einkaufen/**
+
+**Auf das iPhone:**
+1. Die Adresse oben in **Safari** öffnen.
+2. Unten auf **Teilen** (Quadrat mit Pfeil) tippen.
+3. **„Zum Home-Bildschirm“** wählen und auf **Hinzufügen** tippen.
+4. Die App über das neue Icon „Alltag“ öffnen und dein Konto anlegen.
+
+**Android:** Adresse in Chrome öffnen → Menü (⋮) → „App installieren“.
+
+**Zusammen mit deiner Freundin:** Jede Person installiert die App auf ihrem eigenen Handy und legt dort ihr Konto an.
+Zum Abgleichen: **Einstellungen → Mit Partner abgleichen**
+1. „Daten senden“ tippen und die Datei per WhatsApp/AirDrop schicken.
+2. Die andere Person tippt „Daten empfangen“ und wählt die Datei.
+3. Danach umgekehrt. Ab dann habt ihr denselben Stand – Einkaufsliste, Kalender, Rezepte, Essensplan und Erinnerungen.
+   Private Termine bleiben beim anderen unsichtbar. Alternativ geht es auch mit „Code kopieren/einfügen“ (ohne Fotos).
+
+**Gut zu wissen in der Web-App-Version:**
+- Erinnerungen melden sich, solange die App geöffnet ist. Für zuverlässige Wecker: im Termin auf das Kalender-Symbol tippen
+  (oder *Einstellungen → Alle Termine in Handy-Kalender*) – dann steht der Termin mit Erinnerung im iPhone-Kalender.
+- Die Rezeptsuche im Internet läuft über öffentliche Vermittlungsdienste und kann manchmal nicht erreichbar sein.
+  Eigene Rezepte und der Import per Link funktionieren dann trotzdem bzw. später wieder.
+- Die „Daten senden“-Datei ist gleichzeitig eure Sicherung.
+
+---
+
+## Optional: mit eigenem Server (gemeinsame Daten in Echtzeit, Push-Nachrichten)
+
+Wer Echtzeit-Abgleich ohne Datei-Austausch und Push-Benachrichtigungen auch bei geschlossener App möchte,
+kann die Server-Version betreiben (kostet ca. 5–7 $ im Monat):
 
 Damit du und deine Freundin die App auf dem Handy nutzen könnt, muss sie dauerhaft im Internet laufen.
 Am einfachsten geht das mit **Render** (ca. 7 $ im Monat inkl. dauerhaftem Speicher) oder **Railway** (ab ca. 5 $ im Monat).
@@ -9,7 +49,7 @@ Beide verbinden sich direkt mit diesem GitHub-Repository – du musst nichts pro
 
 ---
 
-## Variante A: Render (empfohlen, fast alles automatisch)
+### Variante A: Render (empfohlen, fast alles automatisch)
 
 1. Stelle sicher, dass der Code auf dem Haupt-Branch (`main`) liegt (den Pull Request mergen).
 2. Gehe auf **https://render.com** und melde dich mit deinem **GitHub-Konto** an.
@@ -24,7 +64,7 @@ Diesen Code gibst du beim Registrieren ein (du und deine Freundin). Du kannst ih
 
 ---
 
-## Variante B: Railway
+### Variante B: Railway
 
 1. Gehe auf **https://railway.app** und melde dich mit **GitHub** an.
 2. **„New Project“ → „Deploy from GitHub repo“** → Repository **Einkaufen** wählen.
@@ -37,24 +77,3 @@ Diesen Code gibst du beim Registrieren ein (du und deine Freundin). Du kannst ih
 
 ---
 
-## Auf den Home-Bildschirm holen
-
-**iPhone (Safari – muss Safari sein):**
-1. Eure App-Adresse in Safari öffnen.
-2. Unten auf das **Teilen-Symbol** (Quadrat mit Pfeil nach oben) tippen.
-3. **„Zum Home-Bildschirm“** wählen → „Hinzufügen“.
-4. Die App vom Home-Bildschirm aus öffnen, anmelden und unter **Einstellungen → Benachrichtigungen** einschalten.
-
-**Android (Chrome):**
-1. Adresse in Chrome öffnen.
-2. Menü (⋮) → **„App installieren“** bzw. „Zum Startbildschirm hinzufügen“.
-
-Die App öffnet sich dann wie eine normale App – ohne Browser-Leiste, mit eigenem Symbol.
-
----
-
-## Zusammen nutzen
-
-1. Beide registrieren sich (jeweils eigenes Konto, mit dem Registrierungscode).
-2. Einer geht auf **Einstellungen → Person einladen** und gibt die E-Mail des anderen ein.
-3. Der andere öffnet **Einstellungen** und tippt auf **„Beitreten“** – fertig, ab jetzt teilt ihr Kalender, Einkaufslisten, Rezepte und Erinnerungen.

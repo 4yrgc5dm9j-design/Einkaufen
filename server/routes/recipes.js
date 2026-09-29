@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { db, plain, plainAll } from '../db.js';
-import { str, int, num, bad, notFound, jsonArray } from '../lib/validate.js';
+import { str, int, num, bad, notFound, jsonArray } from '../../public/js/shared/validate.js';
 import { searchRecipes, getExternalRecipe, importFromUrl } from '../lib/recipeSources.js';
 import { saveDataUrl, saveRemoteImage, deleteLocalImages } from '../lib/uploads.js';
 import { rateLimit } from '../auth.js';

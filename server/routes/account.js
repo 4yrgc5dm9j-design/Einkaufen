@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { db, tx, plain, plainAll } from '../db.js';
 import { config } from '../config.js';
 import { hashPassword, verifyPassword, createSession, destroySession, requireAuth, rateLimit } from '../auth.js';
-import { str, color, oneOf, bad, notFound, HttpError } from '../lib/validate.js';
+import { str, color, oneOf, bad, notFound, HttpError } from '../../public/js/shared/validate.js';
 import { BUNDESLAENDER } from '../../public/js/shared/holidays.js';
 import { vapidPublicKey } from '../push.js';
 

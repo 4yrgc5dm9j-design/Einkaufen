@@ -4,6 +4,7 @@ import { localStorageGet, localStorageSet } from '../app.js';
 import { loadOccurrences, occurrencesOn, timeLabel } from '../events.js';
 import { toLocalDate, toLocalDateTime, parseLocal, addDays, addMonths, RECURRENCE_LABELS } from '../shared/recurrence.js';
 import { holidaysOn } from '../shared/holidays.js';
+import { downloadIcs } from '../ics.js';
 
 export const EVENT_COLORS = ['#6366f1', '#3b82f6', '#0ea5e9', '#14b8a6', '#22c55e', '#eab308', '#f97316', '#ef4444', '#ec4899', '#8b5cf6', '#64748b'];
 const REMINDERS = [
@@ -338,7 +339,7 @@ export async function render(view, { query }, ctx) {
         <div class="field"><label>Notizen</label><textarea class="input" name="notes" rows="3" style="min-height:80px" placeholder="optional">${base.notes}</textarea></div>
         ${!isNew && ctx.members.length > 1 ? html`<p class="muted small">Erstellt von ${owner?.name || 'unbekannt'}</p>` : ''}
       </form>`,
-      footer: html`${!isNew ? html`<button class="btn btn-ghost" data-del style="color:var(--danger)">${icon('trash', 16)}</button><span class="spacer"></span>` : ''}
+      footer: html`${!isNew ? html`<button class="btn btn-ghost" data-del style="color:var(--danger)" aria-label="Löschen">${icon('trash', 16)}</button><button class="btn btn-ghost" data-ics title="In den Kalender des Handys übernehmen" aria-label="In Handy-Kalender">${icon('calendar', 16)}</button><span class="spacer"></span>` : ''}
         <button class="btn btn-ghost" data-close>Abbrechen</button>
         <button class="btn btn-primary" data-save>Speichern</button>`,
     });
@@ -404,6 +405,8 @@ export async function render(view, { query }, ctx) {
       e.preventDefault();
       save();
     };
+    const ics = $('[data-ics]', m.el);
+    if (ics) ics.onclick = () => downloadIcs([{ ...occ, start: base.start, end: base.end }], `${occ.title.replace(/[^\wäöüÄÖÜß -]+/g, '').trim() || 'termin'}.ics`);
     const del = $('[data-del]', m.el);
     if (del)
       del.onclick = async () => {

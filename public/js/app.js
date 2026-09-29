@@ -1,4 +1,5 @@
 import { api } from './api.js';
+import { MODE } from './config.js';
 import { html, setHTML, icon, avatar, $, toast } from './ui.js';
 
 const NAV = [
@@ -205,6 +206,10 @@ function urlBase64ToUint8Array(base64) {
 }
 
 export async function pushStatus() {
+  if (MODE === 'local') {
+    if (!('Notification' in window)) return 'unsupported';
+    return { granted: 'on', denied: 'denied' }[Notification.permission] || 'off';
+  }
   if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) return 'unsupported';
   if (Notification.permission === 'denied') return 'denied';
   const reg = await Promise.race([navigator.serviceWorker.ready, new Promise((r) => setTimeout(() => r(null), 3000))]);
@@ -216,6 +221,7 @@ export async function pushStatus() {
 export async function enablePush() {
   const perm = await Notification.requestPermission();
   if (perm !== 'granted') throw new Error('Benachrichtigungen wurden nicht erlaubt.');
+  if (MODE === 'local') return;
   const reg = await navigator.serviceWorker.ready;
   let sub = await reg.pushManager.getSubscription();
   if (!sub) {
@@ -225,6 +231,7 @@ export async function enablePush() {
 }
 
 export async function disablePush() {
+  if (MODE === 'local') throw new Error('Benachrichtigungen kannst du in den Einstellungen deines Handys bzw. Browsers ausschalten.');
   const reg = await navigator.serviceWorker.ready;
   const sub = await reg.pushManager.getSubscription();
   if (sub) {
@@ -254,6 +261,7 @@ async function boot() {
   if (!$('.shell')) setHTML($('#app'), '');
   renderChrome();
   route();
+  if (MODE === 'local') import('./local/notify.js').then((m) => m.startLocalNotifications(ctx.user.id));
 }
 
 window.addEventListener('hashchange', () => ctx.me && route());
@@ -266,7 +274,7 @@ window.addEventListener('auth:expired', () => {
 matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => applyTheme());
 
 applyTheme();
-if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {});
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
 boot();
 
 export function logout() {

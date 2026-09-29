@@ -13,7 +13,15 @@ Eine moderne Web-App (installierbar als App auf dem Handy) für den gemeinsamen 
 - **👥 Konten & Haushalt** – jede Person hat ein eigenes Konto. Über *Einstellungen → Person einladen* lädt man jemanden per E-Mail ein; erst wenn die Person die Einladung annimmt, teilt ihr Kalender, Listen, Rezepte, Essensplan und Erinnerungen.
 - **🌗 Hell/Dunkel**, mobil optimiert (Tab-Leiste unten), Desktop mit Seitenleiste, offline startfähig (PWA).
 
-## Schnellstart (lokal)
+## Kostenlose Web-App (GitHub Pages)
+
+Die App läuft auch komplett ohne Server im Browser und lässt sich auf dem iPhone wie eine normale App auf den Home-Bildschirm legen – kostenlos, wie das Haushaltsbuch. Die Daten bleiben auf dem jeweiligen Handy, abgeglichen wird über *Einstellungen → Mit Partner abgleichen*.
+
+👉 **https://4yrgc5dm9j-design.github.io/Einkaufen/** (einmalig einrichten: siehe [ANLEITUNG-ONLINE.md](ANLEITUNG-ONLINE.md))
+
+Lokal bauen: `npm run build:pages` → Ordner `dist/`.
+
+## Schnellstart mit Server (lokal)
 
 Voraussetzung: [Node.js](https://nodejs.org) **22.13 oder neuer**.
 

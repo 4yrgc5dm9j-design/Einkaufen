@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { db, plainAll } from '../db.js';
-import { str, int, notFound, oneOf, localDate, bad, jsonArray } from '../lib/validate.js';
+import { str, int, notFound, oneOf, localDate, bad, jsonArray } from '../../public/js/shared/validate.js';
 
 export const mealplanRouter = Router();
 const SLOTS = ['breakfast', 'lunch', 'dinner', 'snack'];

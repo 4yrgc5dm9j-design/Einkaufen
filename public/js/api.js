@@ -1,4 +1,5 @@
-// Dünner Wrapper um fetch für die JSON-API.
+// Dünner Wrapper um die JSON-API – entweder per fetch zum Server oder an das lokale Backend im Browser.
+import { MODE } from './config.js';
 
 export class ApiError extends Error {
   constructor(status, message) {
@@ -7,7 +8,20 @@ export class ApiError extends Error {
   }
 }
 
+let localBackend = null;
+
 async function request(method, url, body) {
+  if (MODE === 'local') {
+    localBackend ??= import('./local/backend.js');
+    const { handle } = await localBackend;
+    try {
+      // Deep-Copy wie bei einer echten Netzwerkanfrage, damit Ansichten keine gespeicherten Objekte verändern
+      return structuredClone(await handle(method, url, body ? structuredClone(body) : {}));
+    } catch (err) {
+      if (err.status === 401 && !url.startsWith('/auth/')) window.dispatchEvent(new CustomEvent('auth:expired'));
+      throw new ApiError(err.status || 500, err.status ? err.message : 'Interner Fehler: ' + err.message);
+    }
+  }
   const opts = { method, headers: {}, credentials: 'same-origin' };
   if (method !== 'GET') {
     opts.headers['Content-Type'] = 'application/json';
@@ -15,7 +29,7 @@ async function request(method, url, body) {
   }
   let res;
   try {
-    res = await fetch(`/api${url}`, opts);
+    res = await fetch(`api${url}`, opts);
   } catch {
     throw new ApiError(0, 'Keine Verbindung zum Server.');
   }
