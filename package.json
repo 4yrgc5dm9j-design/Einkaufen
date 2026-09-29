@@ -1,0 +1,30 @@
+{
+  "name": "alltag",
+  "version": "1.0.0",
+  "description": "Alltags-App: Einkaufsliste, Rezepte, Essensplan, gemeinsamer Kalender und Erinnerungen",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node --disable-warning=ExperimentalWarning server/index.js",
+    "dev": "node --watch --disable-warning=ExperimentalWarning server/index.js",
+    "test": "node --disable-warning=ExperimentalWarning --test test/*.test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/4yrgc5dm9j-design/Einkaufen.git"
+  },
+  "author": "",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/4yrgc5dm9j-design/Einkaufen/issues"
+  },
+  "homepage": "https://github.com/4yrgc5dm9j-design/Einkaufen#readme",
+  "dependencies": {
+    "express": "^5.2.1",
+    "web-push": "^3.6.7"
+  },
+  "type": "module",
+  "engines": {
+    "node": ">=22.13"
+  },
+  "private": true
+}
