@@ -30,8 +30,9 @@ async function fetchText(url, { kind = 'html', direct = false } = {}) {
   const attempts = [];
   if (direct) attempts.push(() => fetchWithTimeout(url, { ms: 10000 }));
   attempts.push(() => fetchWithTimeout(JINA + url, { headers: { 'X-Return-Format': kind === 'json' ? 'text' : 'html' } }));
-  // zweiter Versuch, falls Jina kurz überlastet ist
+  // zweiter Versuch, falls Jina kurz überlastet ist, danach allorigins als Reserve
   attempts.push(() => fetchWithTimeout(JINA + url, { headers: { 'X-Return-Format': kind === 'json' ? 'text' : 'html', 'X-No-Cache': 'true' } }));
+  attempts.push(() => fetchWithTimeout(`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`, { ms: 12000 }));
   let lastErr;
   for (const attempt of attempts) {
     try {

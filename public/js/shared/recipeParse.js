@@ -196,7 +196,7 @@ export function chefkochToRecipe(r) {
         unit: parseIngredient(`1 ${ing.unit || ''} x`)?.unit || ing.unit || '',
         name: cleanText(ing.name),
         note: cleanText(ing.usageInfo || '').replace(/^,\s*/, ''),
-        group: group.header || undefined,
+        group: String(group.header || '').replace(/[\s:]+$/, '').trim() || undefined,
       });
     }
   }
