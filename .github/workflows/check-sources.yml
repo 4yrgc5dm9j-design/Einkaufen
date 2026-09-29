@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches: [claude/alltags-app-rezepte-kalender-gr3pwt]
-    paths: [scripts/check-sources.mjs]
+    paths: [scripts/check-sources.mjs, scripts/check-web-app.mjs, public/js/local/web.js, public/js/shared/recipeParse.js]
 
 permissions:
   contents: read
@@ -17,4 +17,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: node scripts/check-sources.mjs
+      - name: Rezeptfunktionen der Web-App
+        run: node scripts/check-web-app.mjs
+      - name: Einzelne Quellen und Vermittler
+        if: always()
+        run: node scripts/check-sources.mjs
